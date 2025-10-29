@@ -1,0 +1,26 @@
+workflows:
+  ios_release:
+    name: iOS Release
+    environment:
+      flutter: stable
+      xcode: latest
+      vars:
+        BUNDLE_ID: com.alcatrazarmy.myapp   # change if needed
+    scripts:
+      - flutter clean
+      - flutter pub get
+      # build without signing; works on Windows + Codemagic
+      - flutter build ios --release --no-codesign
+      # package .ipa
+      - cd ios && xcodebuild -workspace Runner.xcworkspace \
+          -scheme Runner -configuration Release -sdk iphoneos \
+          -archivePath build/Runner.xcarchive archive CODE_SIGNING_ALLOWED=NO
+      - xcodebuild -exportArchive -archivePath ios/build/Runner.xcarchive \
+          -exportOptionsPlist ios/ExportOptions.plist -exportPath build/ios/ipa \
+          CODE_SIGNING_ALLOWED=NO || true
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - $CM_EMAIL # optional
