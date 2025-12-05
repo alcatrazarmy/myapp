@@ -1,0 +1,71 @@
+name: Flutter CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  analyze-test:
+    name: Analyze, Format check, and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Flutter SDK pub cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Check formatting
+        run: flutter format --set-exit-if-changed .
+
+      - name: Static analysis
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run tests
+        run: flutter test --coverage
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage
+
+# Optional: Android build job, off by default to keep CI fast.
+# To enable, uncomment the job below (or I can add it later when you ask).
+#
+#  android-build:
+#    name: Build Android APK
+#    runs-on: ubuntu-latest
+#    needs: analyze-test
+#    if: github.event_name == 'push' && contains(github.ref, 'main')
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: 'stable'
+#      - run: flutter pub get
+#      - run: flutter build apk --release
+#      - name: Upload artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: app-release-apk
+#          path: build/app/outputs/flutter-apk/app-release.apk
