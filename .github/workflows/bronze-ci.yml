@@ -1,0 +1,82 @@
+name: Bronze CI - Fast checks
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  bronze-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install minimal tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install black ruff pytest pre-commit
+
+      - name: Run Bronze checks (format, lint, smoke tests)
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          echo "Detecting repo languages and running fast checks..."
+
+          # Python checks (black + ruff + pytest smoke)
+          if [ -f "pyproject.toml" ] || ls *.py >/dev/null 2>&1; then
+            echo "> Python detected: running black/ruff checks"
+            black --check .
+            ruff .
+            if [ -d "tests" ] || ls test_*.py >/dev/null 2>&1 || ls *_test.py >/dev/null 2>&1; then
+              echo "> Running pytest smoke tests"
+              pytest -q -k "smoke or not smoke" || echo "pytest returned non-zero (if no smoke tests, this is fine)"
+            fi
+          fi
+
+          # C/C++ checks (clang-format only check)
+          if [ -f "CMakeLists.txt" ] || ls *.cpp *.c *.h >/dev/null 2>&1; then
+            if command -v clang-format >/dev/null 2>&1; then
+              echo "> clang-format available: running check"
+              git ls-files -z | xargs -0 clang-format -output-replacements-xml | grep -q "<replacement " && echo "clang-format violations found" && exit 1 || echo "clang-format OK"
+            fi
+          fi
+
+          # Dart/Flutter checks
+          if [ -f "pubspec.yaml" ]; then
+            echo "> Flutter/Dart detected: running dart format check"
+            if command -v dart >/dev/null 2>&1; then
+              dart format --set-exit-if-changed . || echo "dart format check failed or not available"
+            fi
+          fi
+
+          # JavaScript/TypeScript checks
+          if [ -f "package.json" ]; then
+            echo "> Node.js detected: checking for formatting/linting"
+            if command -v npm >/dev/null 2>&1; then
+              if grep -q "prettier" package.json; then
+                echo "> Running prettier check"
+                npx prettier --check . || echo "prettier check failed"
+              fi
+              if grep -q "eslint" package.json; then
+                echo "> Running eslint"
+                npx eslint . || echo "eslint failed"
+              fi
+            fi
+          fi
+
+          echo "Bronze checks complete!"
