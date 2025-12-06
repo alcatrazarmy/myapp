@@ -31,7 +31,7 @@ class BronzeBot:
         if (self.workspace_path / "pubspec.yaml").exists():
             languages.append("dart")
 
-        if (self.workspace_path / "pyproject.toml").exists() or list(
+        if (self.workspace_path / "pyproject.toml").exists() or any(
             self.workspace_path.glob("*.py")
         ):
             languages.append("python")
@@ -40,13 +40,11 @@ class BronzeBot:
             languages.append("javascript")
 
         if (self.workspace_path / "CMakeLists.txt").exists() or any(
-            [
-                list(self.workspace_path.glob("*.cpp")),
-                list(self.workspace_path.glob("*.c")),
-                list(self.workspace_path.glob("*.h")),
-            ]
+            self.workspace_path.glob(f"*.{ext}")
+            for ext in ["cpp", "c", "h"]
         ):
             languages.append("c/c++")
+
 
         return languages
 

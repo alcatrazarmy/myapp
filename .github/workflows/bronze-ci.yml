@@ -52,7 +52,12 @@ jobs:
           if [ -f "CMakeLists.txt" ] || ls *.cpp *.c *.h >/dev/null 2>&1; then
             if command -v clang-format >/dev/null 2>&1; then
               echo "> clang-format available: running check"
-              git ls-files -z | xargs -0 clang-format -output-replacements-xml | grep -q "<replacement " && echo "clang-format violations found" && exit 1 || echo "clang-format OK"
+              if git ls-files -z | xargs -0 clang-format -output-replacements-xml | grep -q "<replacement "; then
+                echo "clang-format violations found"
+                exit 1
+              else
+                echo "clang-format OK"
+              fi
             fi
           fi
 
