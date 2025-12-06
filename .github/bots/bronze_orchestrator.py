@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Regular Bot/Orchestrator PoC
-A simple bot that orchestrates CI tasks and provides feedback.
+Bronze-level CI Bot/Orchestrator PoC
+A simple bot that orchestrates Bronze-level CI tasks (format, lint, smoke tests) and provides feedback.
 """
 
 import os
@@ -73,13 +73,20 @@ class BronzeOrchestrator:
         languages = {
             'python': os.path.exists(os.path.join(self.workspace, 'pyproject.toml')),
             'dart': os.path.exists(os.path.join(self.workspace, 'pubspec.yaml')),
-            'cpp': (
-                os.path.exists(os.path.join(self.workspace, 'CMakeLists.txt')) or
-                any(os.path.exists(os.path.join(self.workspace, f)) 
-                    for f in os.listdir(self.workspace) 
-                    if f.endswith(('.cpp', '.c', '.h')))
-            )
+            'cpp': os.path.exists(os.path.join(self.workspace, 'CMakeLists.txt'))
         }
+        
+        # Check for C/C++ files if CMakeLists.txt doesn't exist
+        if not languages['cpp']:
+            try:
+                for f in os.listdir(self.workspace):
+                    if f.endswith(('.cpp', '.c', '.h')):
+                        languages['cpp'] = True
+                        break
+            except OSError:
+                # If workspace is not accessible, assume no C/C++ files
+                pass
+        
         return languages
 
     def run_python_checks(self) -> List[CheckResult]:

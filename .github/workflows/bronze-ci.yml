@@ -42,7 +42,7 @@ jobs:
           if [ -f "pyproject.toml" ] || ls *.py >/dev/null 2>&1; then
             echo "> Python detected: running black/ruff checks"
             black --check .
-            ruff .
+            ruff check .
             if [ -d "tests" ] || ls test_*.py >/dev/null 2>&1 || ls *_test.py >/dev/null 2>&1; then
               echo "> Running pytest smoke tests"
               pytest -q -k "smoke or not smoke" || echo "pytest returned non-zero (if no smoke tests, this is fine)"
@@ -53,7 +53,13 @@ jobs:
           if [ -f "CMakeLists.txt" ] || ls *.cpp *.c *.h >/dev/null 2>&1; then
             if command -v clang-format >/dev/null 2>&1; then
               echo "> clang-format available: running check"
-              git ls-files -z | xargs -0 clang-format -output-replacements-xml | grep -q "<replacement " && echo "clang-format check failed" && exit 1 || echo "clang-format check passed"
+              clang_output=$(git ls-files -z | xargs -0 clang-format -output-replacements-xml)
+              if echo "$clang_output" | grep -q "<replacement "; then
+                echo "clang-format check failed"
+                exit 1
+              else
+                echo "clang-format check passed"
+              fi
             else
               echo "> clang-format not installed, skipping C/C++ format check"
             fi
