@@ -46,9 +46,6 @@ def test_bot_imports():
 
 def test_bronze_bot_language_detection():
     """Test language detection in BronzeBot."""
-    import sys
-    from pathlib import Path
-
     bot_dir = Path(__file__).parent.parent / ".github" / "bots"
     sys.path.insert(0, str(bot_dir))
 

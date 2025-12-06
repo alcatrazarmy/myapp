@@ -143,7 +143,7 @@ class BronzeBot:
         if languages["python"]:
             print("Running Python smoke tests...")
             self.run_command(
-                ["pytest", "-q", "-k", "smoke or not smoke"],
+                ["pytest", "-q", "-m", "smoke"],
                 "Python smoke tests",
                 allow_fail=True,
             )
