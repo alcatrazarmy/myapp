@@ -1,5 +1,7 @@
 # myapp
 
+[![Flutter CI](https://github.com/alcatrazarmy/myapp/workflows/Flutter%20CI/badge.svg)](https://github.com/alcatrazarmy/myapp/actions)
+
 A new Flutter project.
 
 ## Getting Started
