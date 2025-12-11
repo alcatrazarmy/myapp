@@ -11,7 +11,7 @@ This document outlines the performance optimizations applied to the Bauliver Flu
 
 **Problem**: 
 - `Theme.of(context)` performs an O(n) widget tree traversal on every invocation
-- The original code called this method twice per build (lines 83, 110)
+- The original code called this method twice per build in the `build()` method
 - Each lookup involves InheritedWidget resolution up the tree
 
 **Solution**:
