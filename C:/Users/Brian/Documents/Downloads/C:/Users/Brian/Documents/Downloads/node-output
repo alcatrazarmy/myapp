@@ -1,0 +1,214 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "OpenSolar API",
+    "description" : "Multi-org OpenAPI spec for OpenSolar integrations, using dynamic JWT-based Bearer token. Supports projects, systems, components, and organization resources.\n",
+    "version" : "1.0.0-oas3.1"
+  },
+  "servers" : [ {
+    "url" : "https://api.opensolar.com/api/"
+  } ],
+  "security" : [ {
+    "BearerAuth" : [ ]
+  } ],
+  "paths" : {
+    "/orgs/{org_id}/projects/" : {
+      "get" : {
+        "tags" : [ "Projects" ],
+        "summary" : "List all projects",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/orgId"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "List of projects"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Projects" ],
+        "summary" : "Create new project",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/orgId"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/org_id_projects_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Project created"
+          }
+        }
+      }
+    },
+    "/orgs/{org_id}/projects/{id}/" : {
+      "get" : {
+        "tags" : [ "Projects" ],
+        "summary" : "Get a single project",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/orgId"
+        }, {
+          "$ref" : "#/components/parameters/projectId"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Full project details"
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Projects" ],
+        "summary" : "Update a project",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/orgId"
+        }, {
+          "$ref" : "#/components/parameters/projectId"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/projects_id_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Project updated"
+          }
+        }
+      }
+    },
+    "/orgs/{org_id}/systems/" : {
+      "get" : {
+        "tags" : [ "Systems" ],
+        "summary" : "List all systems",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/orgId"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "List of systems"
+          }
+        }
+      }
+    },
+    "/orgs/{org_id}/systems/{id}/" : {
+      "get" : {
+        "tags" : [ "Systems" ],
+        "summary" : "Get system by ID",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/orgId"
+        }, {
+          "$ref" : "#/components/parameters/systemId"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "System details"
+          }
+        }
+      }
+    },
+    "/orgs/{org_id}/component_module_activations/" : {
+      "get" : {
+        "tags" : [ "Components" ],
+        "summary" : "List activated panel modules",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/orgId"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Panel modules"
+          }
+        }
+      }
+    },
+    "/auth/sdk-token" : {
+      "post" : {
+        "tags" : [ "Auth" ],
+        "summary" : "Generate SDK JWT using org ID and secret",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/auth_sdktoken_body"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "JWT token response"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "org_id_projects_body" : {
+        "properties" : {
+          "address" : { },
+          "contact" : { },
+          "title" : { }
+        }
+      },
+      "auth_sdktoken_body" : {
+        "properties" : {
+          "org_id" : { },
+          "key_id" : { },
+          "secret_key" : { }
+        }
+      },
+      "projects_id_body" : {
+        "properties" : {
+          "status" : { },
+          "title" : { }
+        }
+      }
+    },
+    "parameters" : {
+      "orgId" : {
+        "name" : "org_id",
+        "in" : "path",
+        "description" : "The ID of your OpenSolar organization",
+        "required" : true,
+        "style" : "simple",
+        "explode" : false,
+        "schema" : { }
+      },
+      "projectId" : {
+        "name" : "id",
+        "in" : "path",
+        "description" : "Unique project ID",
+        "required" : true,
+        "style" : "simple",
+        "explode" : false,
+        "schema" : { }
+      },
+      "systemId" : {
+        "name" : "id",
+        "in" : "path",
+        "description" : "System ID",
+        "required" : true,
+        "style" : "simple",
+        "explode" : false,
+        "schema" : { }
+      }
+    },
+    "securitySchemes" : {
+      "BearerAuth" : {
+        "type" : "http",
+        "scheme" : "bearer"
+      }
+    }
+  }
+}
