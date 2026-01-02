@@ -1,0 +1,37 @@
+name: 🛠️ Build & Deploy Bauliver
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: 🧪 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: ✅ Run build script
+        run: |
+          python solarctl.py sync --dry-run
+
+      - name: 🚀 (Optional) Deploy to Supabase or elsewhere
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          OPENSOLAR_ORG_ID: ${{ secrets.OPENSOLAR_ORG_ID }}
+        run: |
+          python solarctl.py sync
